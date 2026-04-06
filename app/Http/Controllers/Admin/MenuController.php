@@ -54,6 +54,7 @@ class MenuController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
+            'group' => 'required|string|in:Makanan,Minuman,Sup',
             'barcode' => 'required|string|max:100|unique:menus,barcode',
             'image' => 'nullable|url',
             'description' => 'nullable|string',
@@ -88,6 +89,7 @@ class MenuController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
+            'group' => 'required|string|in:Makanan,Minuman,Sup',
             'barcode' => 'required|string|max:100|unique:menus,barcode,' . $menu->id,
             'image' => 'nullable|url',
             'description' => 'nullable|string',

@@ -33,6 +33,14 @@
                 <input type="number" name="price" id="price" class="form-control" value="{{ old('price', $menu->price) }}" required>
             </div>
             <div class="mb-3">
+                <label for="group" class="form-label">Grup</label>
+                <select name="group" id="group" class="form-select" required>
+                    <option value="Makanan" {{ old('group', $menu->group) == 'Makanan' ? 'selected' : '' }}>Makanan</option>
+                    <option value="Minuman" {{ old('group', $menu->group) == 'Minuman' ? 'selected' : '' }}>Minuman</option>
+                    <option value="Sup" {{ old('group', $menu->group) == 'Sup' ? 'selected' : '' }}>Sup</option>
+                </select>
+            </div>
+            <div class="mb-3">
                 <label for="barcode" class="form-label">Barcode</label>
                 <input type="text" name="barcode" id="barcode" class="form-control" value="{{ old('barcode', $menu->barcode) }}" required>
             </div>
