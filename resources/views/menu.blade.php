@@ -24,16 +24,13 @@
                                 <h5 class="card-title text-primary">{{ $menu->name }}</h5>
                                 <p class="card-text text-muted">{{ $menu->description }}</p>
                                 <p class="card-text"><strong>Harga:</strong> <span class="text-success">Rp {{ number_format($menu->price,0,',','.') }}</span></p>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input menu-checkbox" type="checkbox" value="{{ $menu->id }}" id="menu-checkbox-{{ $menu->id }}" data-price="{{ $menu->price }}">
-                                    <label class="form-check-label" for="menu-checkbox-{{ $menu->id }}">Pilih menu</label>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <label for="qty-{{ $menu->id }}" class="mb-0">Qty</label>
-                                    <input type="number" class="form-control qty-input" id="qty-{{ $menu->id }}" name="qty_{{ $menu->id }}" value="1" min="1" disabled style="width: 100px;">
+                                <div class="d-flex align-items-center gap-2 mt-auto">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm qty-down" data-id="{{ $menu->id }}" data-price="{{ $menu->price }}"><i class="bi bi-dash"></i></button>
+                                    <span class="fw-bold qty-display" id="qty-display-{{ $menu->id }}" style="min-width:28px; text-align:center;">0</span>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm qty-up" data-id="{{ $menu->id }}" data-price="{{ $menu->price }}"><i class="bi bi-plus"></i></button>
                                 </div>
                                 <input type="hidden" name="items[{{ $menu->id }}][menu_id]" value="{{ $menu->id }}" disabled>
-                                <input type="hidden" name="items[{{ $menu->id }}][qty]" class="hidden-qty" value="1" disabled>
+                                <input type="hidden" name="items[{{ $menu->id }}][qty]" class="hidden-qty" value="0" disabled>
                             </div>
                         </div>
                     </div>
@@ -45,8 +42,8 @@
 </div>
 @endsection
 @push('scripts')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <script>
-    const checkboxes = document.querySelectorAll('.menu-checkbox');
     const totalEl = document.getElementById('selected-total');
     const addSelectedButton = document.getElementById('add-selected');
 
@@ -58,17 +55,14 @@
         let total = 0;
         let selectedCount = 0;
 
-        checkboxes.forEach(checkbox => {
-            const menuId = checkbox.value;
-            const price = Number(checkbox.dataset.price);
-            const qtyInput = document.getElementById('qty-' + menuId);
-            const hiddenQty = document.querySelector('input[name="items[' + menuId + '][qty]"]');
-
-            if (checkbox.checked) {
+        document.querySelectorAll('.qty-display').forEach(display => {
+            const id = display.id.replace('qty-display-', '');
+            const qty = Number(display.textContent);
+            if (qty > 0) {
                 selectedCount++;
-                const qty = Number(qtyInput.value) || 1;
+                const btn = document.querySelector('.qty-up[data-id="' + id + '"]');
+                const price = Number(btn.dataset.price);
                 total += qty * price;
-                hiddenQty.value = qty;
             }
         });
 
@@ -76,36 +70,44 @@
         addSelectedButton.disabled = selectedCount === 0;
     }
 
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', (event) => {
-            const menuId = event.target.value;
-            const qtyInput = document.getElementById('qty-' + menuId);
-            const hiddenQty = document.querySelector('input[name="items[' + menuId + '][qty]"]');
-            const hiddenMenuIdInput = document.querySelector('input[name="items[' + menuId + '][menu_id]"]');
+    function setQty(menuId, qty) {
+        if (qty < 0) qty = 0;
+        const display = document.getElementById('qty-display-' + menuId);
+        const hiddenQty = document.querySelector('input[name="items[' + menuId + '][qty]"]');
+        const hiddenMenuId = document.querySelector('input[name="items[' + menuId + '][menu_id]"]');
+        const card = display.closest('.card');
 
-            if (event.target.checked) {
-                qtyInput.disabled = false;
-                hiddenQty.disabled = false;
-                hiddenMenuIdInput.disabled = false;
-            } else {
-                qtyInput.disabled = true;
-                hiddenQty.disabled = true;
-                hiddenMenuIdInput.disabled = true;
-            }
+        display.textContent = qty;
+        hiddenQty.value = qty;
 
-            updateTotal();
+        if (qty > 0) {
+            hiddenQty.disabled = false;
+            hiddenMenuId.disabled = false;
+            card.classList.add('border-success', 'shadow-sm');
+            card.classList.remove('border-0');
+        } else {
+            hiddenQty.disabled = true;
+            hiddenMenuId.disabled = true;
+            card.classList.remove('border-success', 'shadow-sm');
+            card.classList.add('border-0');
+        }
+
+        updateTotal();
+    }
+
+    document.querySelectorAll('.qty-up').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const current = Number(document.getElementById('qty-display-' + id).textContent);
+            setQty(id, current + 1);
         });
     });
 
-    const qtyInputs = document.querySelectorAll('.qty-input');
-    qtyInputs.forEach(input => {
-        input.addEventListener('input', () => {
-            const menuId = input.id.replace('qty-', '');
-            const hiddenQty = document.querySelector('input[name="items[' + menuId + '][qty]"]');
-            const value = Number(input.value) > 0 ? Number(input.value) : 1;
-            input.value = value;
-            hiddenQty.value = value;
-            updateTotal();
+    document.querySelectorAll('.qty-down').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const current = Number(document.getElementById('qty-display-' + id).textContent);
+            setQty(id, current - 1);
         });
     });
 
