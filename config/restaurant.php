@@ -14,6 +14,6 @@ return [
         'MEJA-10',
     ],
 
-    // Persentase pajak (PB1 restoran 10%)
-    'tax_rate' => 10,
+    // Persentase pajak (PB1 restoran 11%)
+    'tax_rate' => 11,
 ];
