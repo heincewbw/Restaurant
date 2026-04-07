@@ -59,9 +59,22 @@
                                 @endforeach
                             </tbody>
                             <tfoot>
+                                @php
+                                    $taxRate = config('restaurant.tax_rate', 0);
+                                    $tax = round($total * $taxRate / 100);
+                                    $grandTotal = $total + $tax;
+                                @endphp
                                 <tr>
+                                    <th colspan="3">Subtotal</th>
+                                    <th id="cart-subtotal">Rp {{ number_format($total, 0, ',', '.') }}</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="3">Pajak ({{ $taxRate }}%)</th>
+                                    <th id="cart-tax">Rp {{ number_format($tax, 0, ',', '.') }}</th>
+                                </tr>
+                                <tr class="table-dark">
                                     <th colspan="3">Total</th>
-                                    <th id="cart-total">Rp {{ number_format($total, 0, ',', '.') }}</th>
+                                    <th id="cart-total">Rp {{ number_format($grandTotal, 0, ',', '.') }}</th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -115,10 +128,15 @@
         });
 
         function updateCartTotal() {
-            let total = 0;
+            let subtotal = 0;
             document.querySelectorAll('.cart-subtotal').forEach(function(td) {
-                total += parseInt(td.textContent.replace(/[^\d]/g, ''));
+                subtotal += parseInt(td.textContent.replace(/[^\d]/g, ''));
             });
+            const taxRate = {{ config('restaurant.tax_rate', 0) }};
+            const tax = Math.round(subtotal * taxRate / 100);
+            const total = subtotal + tax;
+            document.getElementById('cart-subtotal').textContent = formatRupiah(subtotal);
+            document.getElementById('cart-tax').textContent = formatRupiah(tax);
             document.getElementById('cart-total').textContent = formatRupiah(total);
         }
     </script>

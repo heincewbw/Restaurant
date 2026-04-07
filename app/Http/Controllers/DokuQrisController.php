@@ -14,7 +14,10 @@ class DokuQrisController extends Controller
         if (!$tableCode || empty($cart)) {
             return redirect()->route('cart')->with('error', 'Keranjang kosong atau meja belum dipilih');
         }
-        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $subtotal = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $taxRate = config('restaurant.tax_rate', 0);
+        $tax = round($subtotal * $taxRate / 100);
+        $total = $subtotal + $tax;
         $invoice = 'INV-' . time();
 
         // Request ke DOKU
@@ -39,7 +42,7 @@ class DokuQrisController extends Controller
         // Simpan invoice ke session untuk validasi webhook
         session(['doku_invoice' => $invoice]);
 
-        return view('checkout-qris', compact('qrUrl', 'total'));
+        return view('checkout-qris', compact('qrUrl', 'subtotal', 'tax', 'total'));
     }
 
     public function webhook(Request $request)

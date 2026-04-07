@@ -177,9 +177,14 @@ class FrontendController extends Controller
             return redirect()->route('cart')->with('error', 'Keranjang kosong');
         }
 
-        $total = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $subtotal = array_sum(array_map(fn($item) => $item['price'] * $item['qty'], $cart));
+        $taxRate = config('restaurant.tax_rate', 0);
+        $tax = round($subtotal * $taxRate / 100);
+        $total = $subtotal + $tax;
 
         $order = Order::create([
+            'subtotal' => $subtotal,
+            'tax' => $tax,
             'total' => $total,
             'status' => 'paid',
             'paid_at' => now(),

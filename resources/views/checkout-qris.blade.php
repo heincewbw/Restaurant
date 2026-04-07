@@ -3,6 +3,8 @@
 <div class="container" style="max-width: 500px;">
     <h3 class="mb-4">Pembayaran QRIS DOKU</h3>
     <div class="card p-4 shadow-sm border-0">
+        <p>Subtotal: <strong>Rp {{ number_format($subtotal ?? 0, 0, ',', '.') }}</strong></p>
+        <p>Pajak ({{ config('restaurant.tax_rate', 0) }}%): <strong>Rp {{ number_format($tax ?? 0, 0, ',', '.') }}</strong></p>
         <p>Total: <strong>Rp {{ number_format($total ?? 0, 0, ',', '.') }}</strong></p>
         <p>Silakan scan QRIS berikut untuk membayar pesanan Anda:</p>
         <div class="text-center mb-3">
